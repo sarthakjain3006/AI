@@ -24,32 +24,33 @@ def getsuccessors(puzzle):
 def manhattan(ans):
             res=sum(abs((val-1)%3 - j%3) + abs((val-1)//3 - j//3) for j, val in enumerate(ans) if val)  #we calculate the minimum distance needed (in both x and y axis) for the misplaced tile to move to its goal state1
             return res
+
 def misplaced(N):
-                res=0
-                for i in range(1,9):
-                    if N[i] != i+1:
-                            res+=1
-                return res
-
+    count = 0
+    for i in range(0, len(goal_state)):
+        if N[i] == 0:
+            continue
+        if (N[i] != goal_state[i]):
+            count += 1
+    return count
     
-
 def astarsearch(problem,mode):
     
     path=[]             #search path    
     tpath=[]             #store temprorary paths                                  
     visited_state = set()         
-    wl = []  #wl=working list       #using priority queue for node and path
+    # wl = []  #wl=working list       #using priority queue for node and path
     newpath=[]     #current path in bigger loop
     fn= 0       #f(n)=h(n)+g(n)
     gn=0
     hn=0        #hueristic
-    heapq.heappush(wl,(0,problem))
-    _, curr = heapq.heappop(wl) #retrieving current node value
+    heapq.heappush(newpath,(0,problem))
+    _, curr = heapq.heappop(newpath) #retrieving current node value
     # heapq.heappush(wl,(0,problem))
     while True: 
         if tuple(curr) in visited_state:
-            _,path=heapq.heappop(newpath)
-            _,curr=heapq.heappop(wl)          #pop next node from working list
+            _,path=heapq.heappop(newpath)  #pop next node from working list
+            curr = path[-1]    
             continue
         if curr == goal_state:
             return (path, len(visited_state))
@@ -61,22 +62,24 @@ def astarsearch(problem,mode):
             for i in res: #for every successor
                 tpath= path + [i]
                 gn=len(tpath)
-                misp=misplaced(i)
-                manhatt= manhattan(i)
+                
+                
                 if mode==2:
-                        hn= misp
+                    hn=misplaced(i)
+                    # print(hn)
                 elif mode==3:
-                        hn= manhatt+misp
+                    hn= manhattan(i)
                 else: hn=0
                 fn = gn+ hn #calculate node cost
 
                 if tuple(i) not in visited_state:
-                    heapq.heappush(wl,(fn,i)) #push fn with successor so it is sorted in working list
+                    # heapq.heappush(wl,(fn,i)) #push fn with successor so it is sorted in working list
                     heapq.heappush(newpath, (fn,tpath))     # push  fn and path with successor to the new path
         _,path=heapq.heappop(newpath)
-        print(len(path))    #pop new path and store it as path
-        _,curr=heapq.heappop(wl)          #pop next node from working list
-        if not wl:
+        curr = path[-1]
+        # print(len(path))    #pop new path and store it as path
+        # _,curr=heapq.heappop(wl)          #pop next node from working list
+        if not path:
             break
     
     print("impossible solution")
@@ -85,6 +88,9 @@ def astarsearch(problem,mode):
 def eval(problem, mode):
     curr_time=time()
     dep,nonv=astarsearch(problem, mode)
+    for i in dep:
+        print(i)
+    print("depth found at ",len(dep))
     finalt=float(time()-curr_time)
     if mode==1:
         f= open("UCSt.txt","a")
@@ -102,12 +108,14 @@ def eval(problem, mode):
 
 
 goal_state=[1,2,3,4,5,6,7,8,0]
-problemset=[[1,2,3,4,5,6,7,8,0],[1,2,3,4,5,6,0,7,8],[1,2,3,5,0,6,4,7,8],[1,3,6,5,0,7,4,8,2]]
-#problemset = [[1,2,3,4,5,6,0,7,8]]
+# problemset=[[1,2,3,4,5,6,7,8,0],[1,2,3,4,5,6,0,7,8],[1,2,3,5,0,6,4,7,8],[1,3,6,5,0,7,4,8,2]]
+problemset = [[1,2,3,4,5,6,7,8,0],[1,2,3,4,5,6,0,7,8],[1,2,3,5,0,6,4,7,8],[1,3,6,5,0,7,4,8,2],[1,6,7,5,0,3,4,8,2],[7,1,2,4,8,5,6,3,0],[0,7,2,4,6,1,3,5,8],[8,6,7,2,5,4,3,0,1]]
+# problemset = [[1,3,6,5,0,7,4,8,2]]
 
 for i in problemset:
     for j in range(1,4):
         eval(i,j)
+        print("\n")
     # curr_time=time()
     # ans=astarsearch(i, 2)  #add mode for: 1) UCS, 2) A star with misplaced tiles; 3) A star with manhattan distance
     # if ans == 0:
