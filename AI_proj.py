@@ -68,7 +68,7 @@ def astarsearch(problem,mode):
                     hn=misplaced(i)
                     # print(hn)
                 elif mode==3:
-                    hn= manhattan(i)
+                    hn= manhattan(i) 
                 else: hn=0
                 fn = gn+ hn #calculate node cost
 
